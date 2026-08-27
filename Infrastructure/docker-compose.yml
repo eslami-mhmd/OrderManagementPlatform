@@ -12,6 +12,17 @@ services:
     volumes:
       - customer_postgres_data:/var/lib/postgresql/data
 
+  order-db:
+    image: postgres:17
+    container_name: order-db
+    environment:
+      POSTGRES_DB: OrderDb
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5433:5432"
+    volumes:
+      - order_postgres_data:/var/lib/postgresql/data
 
   rabbitmq:
     image: rabbitmq:management
@@ -24,3 +35,4 @@ services:
 volumes:
 
   customer_postgres_data:
+  order_postgres_data:
