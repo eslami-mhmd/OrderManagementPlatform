@@ -1,3 +1,4 @@
+using Customer.Application.Common.Interfaces;
 using CustomerEntity = Customer.Domain.Entities.Customer;
 using MediatR;
 
@@ -6,6 +7,16 @@ namespace Customer.Application.Customers.CreateCustomer;
 public sealed class CreateCustomerCommandHandler
     : IRequestHandler<CreateCustomerCommand, Guid>
 {
+    private readonly ICustomerRepository _repository;
+
+
+    public CreateCustomerCommandHandler(
+        ICustomerRepository repository)
+    {
+        _repository = repository;
+    }
+
+
     public async Task<Guid> Handle(
         CreateCustomerCommand request,
         CancellationToken cancellationToken)
@@ -15,7 +26,9 @@ public sealed class CreateCustomerCommandHandler
             request.Email);
 
 
-        // Database will be added in Commit 5
+        await _repository.AddAsync(
+            customer,
+            cancellationToken);
 
 
         return customer.Id;
