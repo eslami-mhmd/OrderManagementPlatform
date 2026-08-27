@@ -1,5 +1,7 @@
 using Customer.Application.Common.Interfaces;
+using Customer.Infrastructure.Messaging;
 using Customer.Infrastructure.Persistence;
+using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -23,6 +25,32 @@ public static class DependencyInjection
         services.AddScoped<
             ICustomerRepository,
             CustomerRepository>();
+
+        services.AddScoped<
+            IMessagePublisher,
+            RabbitMqMessagePublisher>();
+
+
+        services.AddMassTransit(x =>
+        {
+            x.UsingRabbitMq((context, cfg) =>
+            {
+                var rabbit =
+                    configuration
+                        .GetSection("RabbitMq")
+                        .Get<RabbitMqOptions>();
+
+
+                cfg.Host(
+                    rabbit!.Host,
+                    "/",
+                    h =>
+                    {
+                        h.Username(rabbit.Username);
+                        h.Password(rabbit.Password);
+                    });
+            });
+        });
 
 
         return services;

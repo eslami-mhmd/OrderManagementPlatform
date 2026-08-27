@@ -1,3 +1,4 @@
+using Contracts;
 using Customer.Application.Common.Interfaces;
 using CustomerEntity = Customer.Domain.Entities.Customer;
 using MediatR;
@@ -8,12 +9,15 @@ public sealed class CreateCustomerCommandHandler
     : IRequestHandler<CreateCustomerCommand, Guid>
 {
     private readonly ICustomerRepository _repository;
+    private readonly IMessagePublisher _publisher;
 
 
     public CreateCustomerCommandHandler(
-        ICustomerRepository repository)
+        ICustomerRepository repository,
+        IMessagePublisher publisher)
     {
         _repository = repository;
+        _publisher = publisher;
     }
 
 
@@ -28,6 +32,14 @@ public sealed class CreateCustomerCommandHandler
 
         await _repository.AddAsync(
             customer,
+            cancellationToken);
+
+
+        await _publisher.PublishAsync(
+            new CustomerCreatedMessage(
+                customer.Id,
+                customer.Name,
+                customer.Email),
             cancellationToken);
 
 
